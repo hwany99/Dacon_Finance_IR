@@ -1,11 +1,10 @@
-from extract_module import daconCustomExtractor
+from extract import daconCustomExtractor
 from langchain.schema import Document
 import fitz  # PyMuPDF
 
 def process_pdf(file_path):
     # 1. pdf별 page 추출
     doc = fitz.open(file_path)
-    outpt_dir = "/home/a2024712006/dacon/extract_image"
     chunk_temp = []
     for page_number in range(doc.page_count):
         page = doc.load_page(page_number)
@@ -39,9 +38,7 @@ def process_pdf(file_path):
             
         # 2. page별 이미지 추출        
         extractor = daconCustomExtractor(page)
-        print(file_path)
-        print(f"Extracting text from page {page_number + 1}...")        
-        bboxes = extractor.detect_svg_contours(page_number+1, output_dir=outpt_dir, min_svg_gap_dx=25.0, min_svg_gap_dy=25.0, min_w=2.0, min_h=2.0)
+        bboxes = extractor.detect_svg_contours(page_number+1, min_svg_gap_dx=25.0, min_svg_gap_dy=25.0, min_w=2.0, min_h=2.0)
 
                 
         # 3. 이미지별 텍스트 추출
@@ -54,5 +51,6 @@ def process_pdf(file_path):
                     full_text = full_text.replace(clipped_text, table_text)
                     
             chunk_temp.append(full_text)
+            
     chunks = [Document(page_content=t) for t in chunk_temp]
     return chunks

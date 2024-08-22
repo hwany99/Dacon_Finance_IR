@@ -1,18 +1,6 @@
 import numpy as np
-import os
-import io
-import os
-import io
 import cv2 as cv
-import numpy as np
 import fitz  # PyMuPDF
-from PIL import Image, ImageDraw
-
-def count_unique_colors(idx, image):
-    image_array = np.array(image)
-    unique_colors = set(tuple(pixel) for row in image_array for pixel in row)
-    # print(f"idx{idx}: unique colors: {len(unique_colors)}")
-    return len(unique_colors)
 
 ########################## pdf extract calculate func ##########################
 
@@ -91,7 +79,7 @@ class daconCustomExtractor:
     # svg 윤곽선을 감지하여 각 이미지의 외부 및 내부 경계 분석 
     # 각 페이지 => 흑백 이미지로 변환후 이진화를 통해 경계를 찾아냄
     # 그후 클립하여 저장 
-    def detect_svg_contours(self, page_num, output_dir, min_svg_gap_dx: float, min_svg_gap_dy: float, min_w: float, min_h: float):
+    def detect_svg_contours(self, page_num, min_svg_gap_dx: float, min_svg_gap_dy: float, min_w: float, min_h: float):
         
         pixmap = self.clip_page_to_pixmap(zoom=1.0)
         src = self._pixmap_to_cv_image(pixmap)
@@ -99,27 +87,9 @@ class daconCustomExtractor:
         _, binary = cv.threshold(gray, 253, 255, cv.THRESH_BINARY_INV)
         external_bboxes = find_section_borders(binary, min_dx=min_svg_gap_dx, min_dy=min_svg_gap_dy)
 
-        # 화면 디버깅용 코드 => 화면에 경계를 표시해서 보여줌 
-        # Convert to Pillow image for visualization
-        pil_image = Image.fromarray(cv.cvtColor(src, cv.COLOR_BGR2RGB))
-        draw = ImageDraw.Draw(pil_image)
-        for bbox in external_bboxes:
-            x0, y0, x1, y1 = bbox
-            draw.rectangle([x0, y0, x1, y1], outline="red", width=2)
-        pil_image.show()
-
-        # 클립된 영역 이미지 저장 
-        os.makedirs(output_dir, exist_ok=True)
-        for i, bbox in enumerate(external_bboxes):
-            pixmap = self.clip_page_to_pixmap(bbox=bbox, zoom=3.0)
-            image = Image.open(io.BytesIO(pixmap.tobytes()))
-            if count_unique_colors(i, image) > 300:
-                image.save(f"{output_dir}/{page_num}_{i}.png")
         return external_bboxes
     
     @staticmethod
     def _pixmap_to_cv_image(pixmap: fitz.Pixmap):
-        import cv2 as cv
-        import numpy as np
         img_byte = pixmap.tobytes()
         return cv.imdecode(np.frombuffer(img_byte, np.uint8), cv.IMREAD_COLOR)
