@@ -12,8 +12,6 @@ warnings.filterwarnings("ignore")
 base_dir = './data/'
 df = pd.read_csv(base_dir + 'test.csv')
 
-# pdf_databases = process_pdfs_from_dataframe(df, base_dir)
-
 db_filename = os.path.join(base_dir, 'pdf_databases.pkl')
 if os.path.exists(db_filename):
     pdf_databases = load_pdf_databases(db_filename)
