@@ -28,7 +28,11 @@ def process_single_pdf(path, base_directory):
 
     chunks = process_pdf(path)
     db = create_vector_db(chunks)
-    
+    retriever = get_retriver(chunks, db)
+
+    return pdf_title, retriever, chunks, db
+
+def get_retriver(chunks, db):
     kiwi_bm25_retriever = KiwiBM25Retriever.from_documents(chunks)
     faiss_retriever = db.as_retriever()
     
@@ -38,14 +42,14 @@ def process_single_pdf(path, base_directory):
         search_type="similarity",
     )
 
-    return pdf_title, retriever
+    return retriever
 
 def process_pdfs_from_dataframe(df, base_directory):
     pdf_databases = {}
     unique_paths = df['Source_path'].unique()
 
     for path in tqdm(unique_paths):
-        pdf_key, pdf_value = process_single_pdf(path, base_directory)
+        pdf_key, pdf_value, chunks, db = process_single_pdf(path, base_directory)
         pdf_databases[pdf_key] = pdf_value
 
     return pdf_databases
