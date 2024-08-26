@@ -24,7 +24,9 @@ else:
 def format_docs(docs):
     return '\n\n'.join([doc.page_content for doc in docs])
 
-def process_row(row, pdf_databases):
+def process_row(row):
+    global pdf_databases
+
     source = row['Source']
     question = row['Question']
 
@@ -45,13 +47,14 @@ def process_row(row, pdf_databases):
         "Answer": response
     }
 
-results = []
-for _, row in tqdm(df.iterrows(), total=len(df), desc="Answering Questions"):
-    result = process_row(row, pdf_databases)
-    results.append(result)
 
+if __name__ == "__main__":
+    results = []
+    for _, row in tqdm(df.iterrows(), total=len(df), desc="Answering Questions"):
+        result = process_row(row)
+        results.append(result)
 
-### Save ###
-submit_df = pd.read_csv(base_dir + "sample_submission.csv")
-submit_df['Answer'] = [item['Answer'].replace('**', '') for item in results]
-submit_df.to_csv(base_dir + "final_submission.csv", encoding='UTF-8-sig', index=False)
+    ### Save ###
+    submit_df = pd.read_csv(base_dir + "sample_submission.csv")
+    submit_df['Answer'] = [item['Answer'].replace('**', '') for item in results]
+    submit_df.to_csv(base_dir + "final_submission.csv", encoding='UTF-8-sig', index=False)

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+  <title>ING CHICKEN</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{% static 'chat.css' %}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://nowonbun.github.io/Loader/loader.css">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script type="text/javascript" src="https://nowonbun.github.io/Loader/loader.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400&display=swap" rel="stylesheet">
+  <style>
+    body{
+      font-size:15px;
+      font-family:'Montserrat','Noto Sans KR', sans-serif;
+      font-weight:500;
+      color:#555;
+      padding-top:10px;
+    }
+  </style>
+  </head>
+
+<body class="w3-content" style="max-width:100%;">
+  <div style="padding-left:100px;">
+  <!-- Sidebar/menu -->
+    <nav class="w3-sidebar w3-bar-block w3-collapse w3-top w3-text-black" style="z-index:3;width:250px; background-color:#fff;" id="mySidebar">
+      <!--Sidebar Title    #f1f3ff-->
+      <div class="w3-container w3-display-container w3-padding-16">
+        <i onclick="w3_close()" class="fa fa-remove w3-hide-large w3-button w3-display-topright"></i>
+        <a href="/" style="text-decoration:none;"><h3 class="w3-monospace" style="padding-top:10px;"><b>Fianacial<br>Information<br>AI Retrieval<br>Chatbot</b></h3></a>
+      </div>
+      <form onsubmit="return false;">
+        <input type="radio" name="doc" value="「FIS 이슈 & 포커스」 22-4호 《중앙-지방 간 재정조정제도》" checked/>「FIS 이슈 & 포커스」 22-4호<br>&emsp;《중앙-지방 간 재정조정제도》<br><br>
+        <input type="radio" name="doc" value="「FIS 이슈 & 포커스」 23-2호 《핵심재정사업 성과관리》"/>「FIS 이슈 & 포커스」 23-2호<br>&emsp;《핵심재정사업 성과관리》<br><br>
+        <input type="radio" name="doc" value="「FIS 이슈&포커스」 22-2호 《재정성과관리제도》"/>「FIS 이슈&포커스」 22-2호<br>&emsp;《재정성과관리제도》<br><br>
+        <input type="radio" name="doc" value="「FIS 이슈 & 포커스」(신규) 통권 제1호 《우발부채》"/>「FIS 이슈 & 포커스」(신규)<br>&emsp;&ensp;통권 제1호 《우발부채》<br><br>
+        <input type="radio" name="doc" value="국토교통부_행복주택출자"/>&ensp;국토교통부_행복주택출자<br><br>
+        <input type="radio" name="doc" value="보건복지부_노인장기요양보험 사업운영"/>&ensp;보건복지부_노인장기요양보험<br>&emsp;&ensp;사업운영<br><br>
+        <input type="radio" name="doc" value="보건복지부_부모급여(영아수당) 지원"/>&ensp;보건복지부_부모급여(영아수당) 지원<br><br>
+        <input type="radio" name="doc" value="산업통상자원부_에너지바우처"/>&ensp;산업통상자원부_에너지바우처<br><br>
+        <input type="radio" name="doc" value="중소벤처기업부_혁신창업사업화자금(융자)"/>&ensp;중소벤처기업부_혁신창업사업화자금<br>&emsp;&nbsp;(융자)<br><br>
+      </form>
+    </nav>
+
+    <div class="w3-main" style="margin-left:250px">
+      <header class="w3-container w3-xlarge">
+        <p class="w3-left-align" style="color:#000000"><b>Chat</b></p>
+      </header>
+      <div class="w3-container" id="class_content">
+        <div id="chat">
+          <div class="results" id="result0"><p>무엇을 도와드릴까요?</p></div>
+        </div>
+        <div class="container">
+          <form onsubmit="return false;">
+            <input type="text" class="input" id="inputDirect" name="inputDirect" autocomplete="off" placeholder="Enter your question" autofocus/>
+          </form>
+          <button class="send" id="send1">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script type="text/javascript">
+
+    var btn = 1;
+    var chat_window = 0;
+    $(function() {
+      $("#inputDirect").keydown(function(key) {
+        if (key.keyCode == 13) { showResult(btn); btn = btn + 1 }
+      })
+
+      $("#send1").on('click', function(){showResult(btn); btn = btn + 1});
+  
+      function showResult(btn){
+        loader.setReload(true);
+        question = $("#inputDirect").val();
+        doc = $("input:radio[name='doc']:checked").val();
+
+        temp = `<div class="questions" id="question${btn}">
+          <p>문서: ${doc}</p>
+          <p><b>${question}</b></p>
+        </div>`
+        $("#chat").append(temp);
+        $('#chat').scrollTop($('#chat')[0].scrollHeight)
+        $("input#inputDirect").val('');
+        
+        $.ajax({
+          type: "POST",
+          url: "{% url 'send' %}",
+          data: JSON.stringify({"doc": doc, "question" : question}),
+          success: function (response) {
+            loader.off();
+            answer = response.answer;
+            
+            temp = `<div class="results" id="result${btn}">
+              <p>${answer}</b></p>
+            </div>`
+            $("#chat").append(temp);
+            $('#chat').scrollTop($('#chat')[0].scrollHeight)
+          },
+          error: function(){
+            loader.off();
+            temp = `<div class="results" id="result${btn}"><p><b>Input is not valid.</b></p></div>`
+            $("#chat").append(temp);
+            $('#chat').scrollTop($('#chat')[0].scrollHeight)
+          }
+        });
+        loader.on();
+      };
+    });
+  </script>
+</body>
+</html>

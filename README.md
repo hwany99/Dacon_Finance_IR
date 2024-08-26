@@ -9,12 +9,21 @@
 │   ├── sample_submission.csv
 │   ├── test.csv
 │   └── train.csv
+│
+### web
+├── chat/
+├── static/
+├── web/
+├── manage.py
+│
+### modules
 ├── create_db.py
 ├── extract.py
 ├── model.py
 ├── preprocess.py
-├── retrieve.py
-└── train.py
+│
+### retrieve
+└── retrieve.py
 ```
 
 ## Install (Ubuntu)
@@ -26,7 +35,8 @@ pip install transformers[torch] -U
 pip install langchain langchain_community langchain_huggingface
 pip install PyMuPDF faiss-gpu
 pip install sentence-transformers peft opencv-python
-pip install kiwipiepy langchain-teddynote
+pip install kiwipiepy konlpy langchain-teddynote
+pip install django
 ```
 ```bash
 wget https://download.oracle.com/java/21/latest/jdk-21_linux-x64_bin.tar.gz
@@ -46,3 +56,9 @@ source ~/.bashrc
 ```bash
 python retrieve.py
 ```
+
+## Web
+```bash
+python manage.py runserver
+```
+access [localhost](http://127.0.0.1:8000/)
