@@ -35,8 +35,21 @@ pip install transformers[torch] -U
 pip install langchain langchain_community langchain_huggingface
 pip install PyMuPDF faiss-gpu
 pip install sentence-transformers peft opencv-python
-pip install kiwipiepy langchain-teddynote
+pip install kiwipiepy konlpy langchain-teddynote
 pip install django
+```
+```bash
+wget https://download.oracle.com/java/21/latest/jdk-21_linux-x64_bin.tar.gz
+tar -xzf jdk-21_linux-x64_bin.tar.gz
+```
+#### add PATH in ~/.bashrc
+```bash
+export JAVA_HOME=~/jdk-21.0.4
+export PATH=$JAVA_HOME/bin:$PATH
+```
+#### shell
+```bash
+source ~/.bashrc
 ```
 
 ## Inference
@@ -48,4 +61,4 @@ python retrieve.py
 ```bash
 python manage.py runserver
 ```
-access [localhost(127.0.0.1:8000)](http://127.0.0.1:8000/)
+access [localhost](http://127.0.0.1:8000/)
