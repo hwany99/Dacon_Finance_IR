@@ -39,7 +39,7 @@ def get_retriver(chunks, db):
     retriever = EnsembleRetriever(
         retrievers=[kiwi_bm25_retriever, faiss_retriever],
         weights=[0.5, 0.5],
-        search_type="similarity",
+        search_type="mmr",
     )
 
     return retriever

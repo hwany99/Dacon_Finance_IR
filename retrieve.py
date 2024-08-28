@@ -21,9 +21,6 @@ else:
 
 
 ### Inference ###
-def format_docs(docs):
-    return '\n\n'.join([doc.page_content for doc in docs])
-
 def process_row(row):
     global pdf_databases
 
@@ -33,9 +30,9 @@ def process_row(row):
     retriever = pdf_databases[source]
     relevant_docs = retriever.invoke(question)
 
-    context, _ = get_Rerank_output(relevant_docs, question)
+    context = get_Rerank_output(relevant_docs, question)
     response = get_QA_output(context, question)
-    response = response.replace('\n\n', '\n')
+    response = response.replace('\n\n', '\n').replace('**', '')
     
     print('Question:', question)
     print('Answer:', response)
@@ -56,5 +53,5 @@ if __name__ == "__main__":
 
     ### Save ###
     submit_df = pd.read_csv(base_dir + "sample_submission.csv")
-    submit_df['Answer'] = [item['Answer'].replace('**', '') for item in results]
+    submit_df['Answer'] = [item['Answer'] for item in results]
     submit_df.to_csv(base_dir + "final_submission.csv", encoding='UTF-8-sig', index=False)

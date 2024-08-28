@@ -1,3 +1,4 @@
+import re
 import torch
 import transformers
 
@@ -20,7 +21,7 @@ terminators = [
     LLM_pipeline.tokenizer.convert_tokens_to_ids("<end_of_turn>")
 ]
 
-def get_LLM_output(prompt, temperature=0.6):
+def get_LLM_output(prompt, temperature=0.6, top_p=0.9):
     global LLM_pipeline, terminators
 
     messages = [
@@ -38,34 +39,41 @@ def get_LLM_output(prompt, temperature=0.6):
         max_new_tokens=2048,
         eos_token_id=terminators,
         do_sample=True,
-        temperature=temperature,
-        top_p=0.9,
+        temperature=temperature, 
+        top_p=top_p,
     )
 
     response = outputs[0]["generated_text"][len(LLM_input):]
     return response
 
+def extract_amounts(text):
+    pattern = r'(\d{1,3}(?:,\d{3})*|\d+)\s*(십|백|천)*(억원|만원|천원|원)'
+    matches = re.findall(pattern, text)
+    
+    if len(matches) == 1:
+        return ''.join(matches[0])
+    else:
+        return text
+
 def get_QA_output(context, question):
     prompt = f"""
-    다음 정보를 바탕으로 질문에 답하세요:
-    {context}
+    <정보>:
+    [{context}]
 
-    질문: {question}
- 
-    주어진 질문에만 완전한 문장으로 답변해주세요. 답변할 때 질문의 주어를 써주세요.
+    위 정보에서 아래 질문과 관련된 정보를 이용하여
+    주어진 질문에만 명확하고 완전한 문장으로 답변해주세요.
+    답변할 때 질문의 주어를 써주세요.
     
-    근거 및 추진에 대한 질문은 사업근거 및 추진경위 문장을 참고하세요.
-    금액에 대한 질문은 단위를 포함하여 단답형으로 답변해주세요.
-    
-    답변:
+    <질문>: [{question}]
+
+    <답변>:
     """
 
-    output = get_LLM_output(prompt, 0.6)
-    return output
+    response = get_LLM_output(prompt, 0.2)
+    response = extract_amounts(response)
 
-# return: final_context, full_text
-# final_context: 최종 llm에게 넘길 context
-# full_doc_text: reranking하기 전 context
+    return response
+
 def get_Rerank_output(documents, question):
     context = []
     full_doc_text = ""
@@ -92,21 +100,19 @@ def get_Rerank_output(documents, question):
 
     """
 
-    output = get_LLM_output(prompt)
-    #print(f"Answer: 0, {output}\n") -> debuging용
-    
+    response = get_LLM_output(prompt)
 
     reranked_idx_list = [0]
     
     # 1,2,3,4중 reranking된 index 추출
-    for char in output:
+    for char in response:
         if char.isdigit() and char != "0":
             idx = int(char)
             if idx not in reranked_idx_list and idx < 5:
                 reranked_idx_list.append(idx)
                 
-    #print(f"reranked_list: {reranked_idx_list}\n") -> debuging용
     final_context = ""
     for idx in reranked_idx_list:
         final_context += f"\n{context[idx]}\n"
-    return final_context, full_doc_text
+    
+    return final_context
